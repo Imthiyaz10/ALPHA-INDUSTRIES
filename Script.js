@@ -1,257 +1,122 @@
 
-// =====================================
-// ALPHA INDUSTRIES - JAVASCRIPT
-// =====================================
+/* ==========================================
+   ALPHA INDUSTRIES
+   WORKING LORRY IMAGE CAROUSEL
+========================================== */
 
+document.addEventListener("DOMContentLoaded", function () {
 
-// MOBILE NAVIGATION
+    const carousel = document.getElementById("lorryCarousel");
 
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.getElementById("navLinks");
+    if (!carousel) {
+        console.error("Lorry carousel not found!");
+        return;
+    }
 
-menuToggle.addEventListener("click", function () {
-
-    navLinks.classList.toggle("active");
-
-    const isOpen = navLinks.classList.contains("active");
-
-    menuToggle.textContent = isOpen ? "✕" : "☰";
-
-    menuToggle.setAttribute("aria-expanded", isOpen);
-
-});
-
-
-// CLOSE MOBILE MENU AFTER CLICKING A LINK
-
-document.querySelectorAll(".nav-links a").forEach(function (link) {
-
-    link.addEventListener("click", function () {
-
-        navLinks.classList.remove("active");
-
-        menuToggle.textContent = "☰";
-
-        menuToggle.setAttribute("aria-expanded", "false");
-
-    });
-
-});
-
-
-// =====================================
-// AUTOMATIC COPYRIGHT YEAR
-// =====================================
-
-document.getElementById("year").textContent =
-    new Date().getFullYear();
-
-
-// =====================================
-// LORRY IMAGE CAROUSEL
-// =====================================
-
-const slides = document.querySelectorAll(".carousel-slide");
-
-const dotsContainer = document.getElementById("carouselDots");
-
-const nextButton = document.getElementById("nextSlide");
-
-const previousButton = document.getElementById("prevSlide");
-
-let currentSlide = 0;
-
-let carouselTimer;
-
-
-// CREATE CAROUSEL DOTS
-
-slides.forEach(function (slide, index) {
-
-    const dot = document.createElement("button");
-
-    dot.classList.add("carousel-dot");
-
-    dot.setAttribute(
-        "aria-label",
-        "Show slide " + (index + 1)
+    const slides = Array.from(
+        carousel.querySelectorAll(".carousel-slide")
     );
 
-    dot.addEventListener("click", function () {
+    const dotsContainer = document.getElementById("carouselDots");
+    const previousButton = document.getElementById("prevSlide");
+    const nextButton = document.getElementById("nextSlide");
 
-        showSlide(index);
+    if (slides.length === 0) {
+        console.error("No carousel images found!");
+        return;
+    }
 
-        restartCarousel();
+    let currentIndex = 0;
+    let timer;
 
+    // CREATE NAVIGATION DOTS
+    dotsContainer.innerHTML = "";
+
+    const dots = slides.map((slide, index) => {
+        const dot = document.createElement("button");
+
+        dot.className = "carousel-dot";
+        dot.type = "button";
+        dot.setAttribute("aria-label", "Show image " + (index + 1));
+
+        dot.addEventListener("click", function () {
+            showSlide(index);
+            restartTimer();
+        });
+
+        dotsContainer.appendChild(dot);
+
+        return dot;
     });
 
-    dotsContainer.appendChild(dot);
+    // DISPLAY SELECTED IMAGE
+    function showSlide(index) {
 
-});
+        currentIndex = (index + slides.length) % slides.length;
 
-const dots = document.querySelectorAll(".carousel-dot");
+        slides.forEach((slide, i) => {
+            slide.classList.toggle(
+                "active",
+                i === currentIndex
+            );
+        });
 
+        dots.forEach((dot, i) => {
+            dot.classList.toggle(
+                "active",
+                i === currentIndex
+            );
+        });
 
-// DISPLAY SELECTED SLIDE
+    }
 
-function showSlide(index) {
+    // NEXT IMAGE
+    function nextSlide() {
+        showSlide(currentIndex + 1);
+    }
 
-    slides[currentSlide].classList.remove("active");
+    // PREVIOUS IMAGE
+    function previousSlide() {
+        showSlide(currentIndex - 1);
+    }
 
-    dots[currentSlide].classList.remove("active");
+    // AUTOMATIC SLIDE CHANGING
+    function startTimer() {
+        clearInterval(timer);
 
-    currentSlide = (index + slides.length) % slides.length;
+        if (slides.length > 1) {
+            timer = setInterval(nextSlide, 4000);
+        }
+    }
 
-    slides[currentSlide].classList.add("active");
+    function restartTimer() {
+        startTimer();
+    }
 
-    dots[currentSlide].classList.add("active");
-
-}
-
-
-// NEXT IMAGE
-
-function nextSlide() {
-
-    showSlide(currentSlide + 1);
-
-}
-
-
-// PREVIOUS IMAGE
-
-function previousSlide() {
-
-    showSlide(currentSlide - 1);
-
-}
-
-
-// AUTOMATIC IMAGE CHANGING
-
-function startCarousel() {
-
-    clearInterval(carouselTimer);
-
-    carouselTimer = setInterval(function () {
-
+    // BUTTON EVENTS
+    nextButton.addEventListener("click", function () {
         nextSlide();
+        restartTimer();
+    });
 
-    }, 4000);
+    previousButton.addEventListener("click", function () {
+        previousSlide();
+        restartTimer();
+    });
 
-}
+    // PAUSE WHEN MOUSE IS OVER CAROUSEL
+    carousel.addEventListener("mouseenter", function () {
+        clearInterval(timer);
+    });
 
+    carousel.addEventListener("mouseleave", function () {
+        startTimer();
+    });
 
-// RESTART TIMER AFTER MANUAL CLICK
+    // INITIALIZE
+    showSlide(0);
+    startTimer();
 
-function restartCarousel() {
-
-    startCarousel();
-
-}
-
-
-// BUTTON EVENTS
-
-nextButton.addEventListener("click", function () {
-
-    nextSlide();
-
-    restartCarousel();
-
-});
-
-
-previousButton.addEventListener("click", function () {
-
-    previousSlide();
-
-    restartCarousel();
+    console.log("Alpha Industries carousel initialized!");
 
 });
-
-
-// INITIALIZE CAROUSEL
-
-showSlide(0);
-
-startCarousel();
-
-
-// =====================================
-// CONTACT FORM
-// =====================================
-
-const contactForm = document.getElementById("contactForm");
-
-const formMessage = document.getElementById("formMessage");
-
-contactForm.addEventListener("submit", function (event) {
-
-    event.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-
-    const email = document.getElementById("email").value.trim();
-
-    const phone = document.getElementById("phone").value.trim();
-
-    const subject = document.getElementById("subject").value;
-
-    const message = document.getElementById("message").value.trim();
-
-
-    if (!name || !email || !subject || !message) {
-
-        formMessage.textContent =
-            "Please complete all required fields.";
-
-        return;
-
-    }
-
-
-    // ADD YOUR BUSINESS WHATSAPP NUMBER HERE.
-    // Example: 919876543210
-    const whatsappNumber = "";
-
-
-    if (!whatsappNumber) {
-
-        formMessage.textContent =
-            "Please configure your WhatsApp number in script.js to receive enquiries.";
-
-        return;
-
-    }
-
-
-    const enquiryMessage =
-        "Hello Alpha Industries!\n\n" +
-        "Name: " + name + "\n" +
-        "Email: " + email + "\n" +
-        "Phone: " + phone + "\n" +
-        "Enquiry: " + subject + "\n" +
-        "Message: " + message;
-
-
-    const whatsappURL =
-        "https://wa.me/" +
-        whatsappNumber +
-        "?text=" +
-        encodeURIComponent(enquiryMessage);
-
-
-    window.open(whatsappURL, "_blank");
-
-    formMessage.textContent =
-        "Your enquiry has been prepared in WhatsApp.";
-
-    contactForm.reset();
-
-});
-
-
-// =====================================
-// END OF SCRIPT
-// =====================================
